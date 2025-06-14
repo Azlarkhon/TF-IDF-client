@@ -5,7 +5,8 @@ info:
   title: TF-IDF counter API
   version: 1.2.0
 servers:
-- url: /
+- url: http://37.9.53.45:8080
+- url: http://localhost:8080
 tags:
 - name: Upload document
 - name: Users
@@ -127,11 +128,13 @@ paths:
       description: Deletes a collection (does not delete documents)
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -170,11 +173,13 @@ paths:
       description: Returns a specific collection with its documents
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -213,11 +218,13 @@ paths:
       description: Updates collection name
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       requestBody:
         content:
           application/json:
@@ -267,11 +274,13 @@ paths:
         \ 50 most frequent words and their idf)"
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -311,17 +320,21 @@ paths:
       description: Removes a document from a collection
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -360,17 +373,21 @@ paths:
       description: Adds an existing document to a collection
       parameters:
       - description: Collection ID
+        explode: false
         in: path
         name: collection_id
         required: true
         schema:
           type: string
+        style: simple
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -436,11 +453,13 @@ paths:
       description: Deletes a document by ID (both file and database record)
       parameters:
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -479,11 +498,13 @@ paths:
       description: Returns document details and content by ID
       parameters:
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -530,11 +551,13 @@ paths:
         both encoded and decoded result for verification
       parameters:
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -576,11 +599,13 @@ paths:
         \ is in one collection"
       parameters:
       - description: Document ID
+        explode: false
         in: path
         name: document_id
         required: true
         schema:
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -815,11 +840,13 @@ paths:
     delete:
       parameters:
       - description: ID пользователя
+        explode: false
         in: path
         name: user_id
         required: true
         schema:
           type: integer
+        style: simple
       responses:
         "200":
           content:
@@ -851,11 +878,13 @@ paths:
     patch:
       parameters:
       - description: ID пользователя
+        explode: false
         in: path
         name: user_id
         required: true
         schema:
           type: integer
+        style: simple
       requestBody:
         content:
           application/json:

@@ -1,6 +1,6 @@
 # \UsersAPI
 
-All URIs are relative to *http://localhost*
+All URIs are relative to *http://37.9.53.45:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
