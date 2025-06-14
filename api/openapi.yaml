@@ -1,0 +1,1356 @@
+openapi: 3.0.1
+info:
+  contact: {}
+  description: API for document processing using TF-IDF algorithm
+  title: TF-IDF counter API
+  version: 1.2.0
+servers:
+- url: /
+tags:
+- name: Upload document
+- name: Users
+- name: Collections
+- name: Documents
+- name: Metrics
+- name: Health
+paths:
+  /collections:
+    get:
+      description: Returns all collections belonging to the authenticated user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections_get_200_response'
+          description: List of collections
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get all collections
+      tags:
+      - Collections
+    post:
+      description: Creates a new document collection
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.CreateCollectionReq'
+        description: Collection details
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections_post_201_response'
+          description: Created collection
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Create a new collection
+      tags:
+      - Collections
+      x-codegen-request-body-name: collection
+  /collections/add-many:
+    post:
+      description: Adds a document to several collections at once
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.AddDocumentToCollectionsReq'
+        description: Collection IDs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Add document to multiple collections
+      tags:
+      - Collections
+      x-codegen-request-body-name: request
+  /collections/{collection_id}:
+    delete:
+      description: Deletes a collection (does not delete documents)
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Delete collection
+      tags:
+      - Collections
+    get:
+      description: Returns a specific collection with its documents
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections_post_201_response'
+          description: Collection details
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get collection by ID
+      tags:
+      - Collections
+    put:
+      description: Updates collection name
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.UpdateCollectionReq'
+        description: New collection name
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections_post_201_response'
+          description: Updated collection
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Update collection
+      tags:
+      - Collections
+      x-codegen-request-body-name: collection
+  /collections/{collection_id}/statistics:
+    get:
+      description: "Gets statistics for the collection: TF is calculated as if all\
+        \ documents in the collection were one document, IDF unchanged (gives top\
+        \ 50 most frequent words and their idf)"
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections__collection_id__statistics_get_200_response'
+          description: Collection statistics
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get collection statistics
+      tags:
+      - Collections
+  /collections/{collection_id}/{document_id}:
+    delete:
+      description: Removes a document from a collection
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Remove document from collection
+      tags:
+      - Collections
+    post:
+      description: Adds an existing document to a collection
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        schema:
+          type: string
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Add document to collection
+      tags:
+      - Collections
+  /documents:
+    get:
+      description: Returns a list of all documents belonging to the authenticated
+        user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_documents_get_200_response'
+          description: List of documents
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get all user documents
+      tags:
+      - Documents
+  /documents/{document_id}:
+    delete:
+      description: Deletes a document by ID (both file and database record)
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Delete a document
+      tags:
+      - Documents
+    get:
+      description: Returns document details and content by ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_documents__document_id__get_200_response'
+          description: Document details
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get a specific document
+      tags:
+      - Documents
+  /documents/{document_id}/huffman:
+    get:
+      description: Encodes the document content using Huffman algorithm and returns
+        both encoded and decoded result for verification
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections__collection_id__statistics_get_200_response'
+          description: Encoded and decoded content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get Huffman encoded and decoded content of a document
+      tags:
+      - Documents
+  /documents/{document_id}/statistics:
+    get:
+      description: "Calculates TF statistics for a given document, and IDF calculated\
+        \ as if all documents in collections, where the document we specified is,\
+        \ is in one collection"
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_collections__collection_id__statistics_get_200_response'
+          description: Document statistics
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get document statistics
+      tags:
+      - Documents
+  /metrics:
+    get:
+      description: "Retrieves aggregated metrics including processing time, file size,\
+        \ and top 10 most seen words"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_metrics_get_200_response'
+          description: Application metrics
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get application metrics
+      tags:
+      - Metrics
+  /status:
+    get:
+      description: Provides the current status of the API
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_status_get_200_response'
+          description: API status
+      summary: Get API status
+      tags:
+      - Health
+  /upload:
+    post:
+      description: "Uploads a file, processes it for TF and IDF, gives top 50 rare\
+        \ words, sets up metrics, and saves to database. Only in this case: IDF =\
+        \ log(total words / count)"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/_upload_post_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_upload_post_200_response'
+          description: TF-IDF statistics
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Upload and process a document
+      tags:
+      - Upload document
+  /users/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.LoginRequest'
+        description: Данные для входа
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: User login and setting JWT cookie
+      tags:
+      - Users
+      x-codegen-request-body-name: credentials
+  /users/logout:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+      summary: User logout (delete cookies)
+      tags:
+      - Users
+  /users/me:
+    get:
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/_users_me_get_200_response'
+          description: OK
+        "401":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Not Found
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Get information about the current user
+      tags:
+      - Users
+  /users/register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.RegisterUserRequest'
+        description: Регистрационные данные
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_users_me_get_200_response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: New user registration
+      tags:
+      - Users
+      x-codegen-request-body-name: user
+  /users/{user_id}:
+    delete:
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Delete user (everything related)
+      tags:
+      - Users
+    patch:
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dto.UpdateUserRequest'
+        description: Новый пароль
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/helper.Response'
+          description: Internal Server Error
+      summary: Update user password
+      tags:
+      - Users
+      x-codegen-request-body-name: update
+  /version:
+    get:
+      description: Provides the current version of the application
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/_version_get_200_response'
+          description: Application version
+      summary: Get application version
+      tags:
+      - Health
+components:
+  schemas:
+    dto.AddDocumentToCollectionsReq:
+      properties:
+        collection_ids:
+          items:
+            type: integer
+          type: array
+        document_id:
+          type: integer
+      required:
+      - collection_ids
+      - document_id
+      type: object
+    dto.CreateCollectionReq:
+      properties:
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    dto.DocumentResponse:
+      example:
+        uploaded_at: uploaded_at
+        name: name
+        id: 0
+        content: content
+      properties:
+        content:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        uploaded_at:
+          type: string
+      type: object
+    dto.LoginRequest:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    dto.RegisterUserRequest:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    dto.UpdateCollectionReq:
+      properties:
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    dto.UpdateUserRequest:
+      properties:
+        password:
+          type: string
+      type: object
+    helper.Response:
+      description: This is the standard response format for all API endpoints
+      example:
+        data: "{}"
+        error: error
+        is_success: true
+      properties:
+        data:
+          type: object
+        error:
+          type: string
+        is_success:
+          type: boolean
+      type: object
+    models.Collection:
+      example:
+        updated_at: updated_at
+        documents:
+        - updated_at: updated_at
+          user_id: 6
+          name: name
+          created_at: created_at
+          id: 0
+        - updated_at: updated_at
+          user_id: 6
+          name: name
+          created_at: created_at
+          id: 0
+        user_id: 5
+        name: name
+        created_at: created_at
+        id: 1
+      properties:
+        created_at:
+          type: string
+        documents:
+          items:
+            $ref: '#/components/schemas/models.Document'
+          type: array
+        id:
+          type: integer
+        name:
+          type: string
+        updated_at:
+          type: string
+        user_id:
+          type: integer
+      type: object
+    models.Document:
+      example:
+        updated_at: updated_at
+        user_id: 6
+        name: name
+        created_at: created_at
+        id: 0
+      properties:
+        created_at:
+          type: string
+        id:
+          type: integer
+        name:
+          description: имя файла или произвольное название
+          type: string
+        updated_at:
+          type: string
+        user_id:
+          type: integer
+      type: object
+    models.Metric:
+      example:
+        avg_time_processed: 6.027456183070403
+        top_10_most_freq_words:
+        - count: 7
+          word: word
+        - count: 7
+          word: word
+        max_time_processed: 5.637376656633329
+        total_file_size_mb: 9.301444243932576
+        latest_file_processed_timestamp: latest_file_processed_timestamp
+        min_time_processed: 2.3021358869347655
+        files_processed: 1
+        id: 5
+        avg_file_size_mb: 0.8008281904610115
+      properties:
+        avg_file_size_mb:
+          type: number
+        avg_time_processed:
+          type: number
+        files_processed:
+          type: integer
+        id:
+          type: integer
+        latest_file_processed_timestamp:
+          type: string
+        max_time_processed:
+          type: number
+        min_time_processed:
+          type: number
+        top_10_most_freq_words:
+          items:
+            $ref: '#/components/schemas/models.Word'
+          type: array
+        total_file_size_mb:
+          type: number
+      type: object
+    models.User:
+      example:
+        updated_at: updated_at
+        created_at: created_at
+        id: 0
+        email: email
+      properties:
+        created_at:
+          type: string
+        email:
+          type: string
+        id:
+          type: integer
+        updated_at:
+          type: string
+      type: object
+    models.Word:
+      example:
+        count: 7
+        word: word
+      properties:
+        count:
+          type: integer
+        word:
+          type: string
+      type: object
+    services.WordStat:
+      example:
+        tf: 1.4658129805029452
+        count: 0
+        idf: 6.027456183070403
+        word: word
+      properties:
+        count:
+          type: integer
+        idf:
+          type: number
+        tf:
+          type: number
+        word:
+          type: string
+      type: object
+    _collections_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/models.Collection'
+            type: array
+        type: object
+      example:
+        data:
+        - updated_at: updated_at
+          documents:
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          user_id: 5
+          name: name
+          created_at: created_at
+          id: 1
+        - updated_at: updated_at
+          documents:
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          user_id: 5
+          name: name
+          created_at: created_at
+          id: 1
+        error: error
+        is_success: true
+    _collections_post_201_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/models.Collection'
+        type: object
+      example:
+        data:
+          updated_at: updated_at
+          documents:
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          - updated_at: updated_at
+            user_id: 6
+            name: name
+            created_at: created_at
+            id: 0
+          user_id: 5
+          name: name
+          created_at: created_at
+          id: 1
+        error: error
+        is_success: true
+    _collections__collection_id__statistics_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/_collections__collection_id__statistics_get_200_response_allOf_data'
+        type: object
+      example:
+        data: {}
+        error: error
+        is_success: true
+    _documents_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/models.Document'
+            type: array
+        type: object
+      example:
+        data:
+        - updated_at: updated_at
+          user_id: 6
+          name: name
+          created_at: created_at
+          id: 0
+        - updated_at: updated_at
+          user_id: 6
+          name: name
+          created_at: created_at
+          id: 0
+        error: error
+        is_success: true
+    _documents__document_id__get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/dto.DocumentResponse'
+        type: object
+      example:
+        data:
+          uploaded_at: uploaded_at
+          name: name
+          id: 0
+          content: content
+        error: error
+        is_success: true
+    _metrics_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/models.Metric'
+        type: object
+      example:
+        data:
+          avg_time_processed: 6.027456183070403
+          top_10_most_freq_words:
+          - count: 7
+            word: word
+          - count: 7
+            word: word
+          max_time_processed: 5.637376656633329
+          total_file_size_mb: 9.301444243932576
+          latest_file_processed_timestamp: latest_file_processed_timestamp
+          min_time_processed: 2.3021358869347655
+          files_processed: 1
+          id: 5
+          avg_file_size_mb: 0.8008281904610115
+        error: error
+        is_success: true
+    _status_get_200_response_allOf_data:
+      example:
+        status: status
+      properties:
+        status:
+          type: string
+      type: object
+    _status_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/_status_get_200_response_allOf_data'
+        type: object
+      example:
+        data:
+          status: status
+        error: error
+        is_success: true
+    _upload_post_request:
+      properties:
+        file:
+          description: Document file to upload
+          format: binary
+          type: string
+      required:
+      - file
+      type: object
+    _upload_post_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/services.WordStat'
+            type: array
+        type: object
+      example:
+        data:
+        - tf: 1.4658129805029452
+          count: 0
+          idf: 6.027456183070403
+          word: word
+        - tf: 1.4658129805029452
+          count: 0
+          idf: 6.027456183070403
+          word: word
+        error: error
+        is_success: true
+    _users_me_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/models.User'
+        type: object
+      example:
+        data:
+          updated_at: updated_at
+          created_at: created_at
+          id: 0
+          email: email
+        error: error
+        is_success: true
+    _version_get_200_response_allOf_data:
+      example:
+        version: version
+      properties:
+        version:
+          type: string
+      type: object
+    _version_get_200_response:
+      allOf:
+      - $ref: '#/components/schemas/helper.Response'
+      - properties:
+          data:
+            $ref: '#/components/schemas/_version_get_200_response_allOf_data'
+        type: object
+      example:
+        data:
+          version: version
+        error: error
+        is_success: true
+    _collections__collection_id__statistics_get_200_response_allOf_data:
+      example: {}
+      properties: {}
+      type: object
+x-original-swagger-version: "2.0"
